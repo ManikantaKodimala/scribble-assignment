@@ -8,11 +8,18 @@ export interface Participant {
   joinedAt: string;
 }
 
+export interface Round {
+  number: number;
+  drawerId: string;
+  word: string;
+}
+
 export interface Room {
   code: string;
   status: RoomStatus;
   participants: Participant[];
   hostId: string;
+  currentRound: Round | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -23,6 +30,8 @@ export interface RoomSnapshot {
   participants: Participant[];
   hostId: string;
   isHost: boolean;
+  drawerId: string | null;
+  secretWord?: string;
   availableWords: string[];
   roles: ParticipantRole[];
 }

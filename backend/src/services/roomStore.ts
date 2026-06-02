@@ -30,7 +30,11 @@ function generateUniqueCode() {
 }
 
 function displayName(name?: string) {
-  return name || "Player";
+  const trimmed = name?.trim() || "";
+  if (!trimmed) {
+    throw new Error("Player name is required");
+  }
+  return trimmed;
 }
 
 function createParticipant(name?: string, isHost = false): Participant {
@@ -57,6 +61,7 @@ export function createRoom(playerName?: string) {
     status: "lobby",
     participants: [participant],
     hostId: participant.id,
+    currentRound: null,
     createdAt: now(),
     updatedAt: now()
   };
@@ -98,6 +103,12 @@ export function saveRoom(room: Room) {
   return getRoom(room.code);
 }
 
+export function selectWord(code: string, roundNumber: number): string {
+  const sum = code.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const index = (sum + roundNumber - 1) % STARTER_WORDS.length;
+  return STARTER_WORDS[index];
+}
+
 export function startGame(code: string, participantId: string): Room | null {
   const room = rooms.get(code);
 
@@ -118,18 +129,30 @@ export function startGame(code: string, participantId: string): Room | null {
   }
 
   room.status = "playing";
+  room.currentRound = {
+    number: 1,
+    drawerId: room.hostId,
+    word: selectWord(room.code, 1)
+  };
   room.updatedAt = now();
 
   return cloneRoom(room);
 }
 
 export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {
+  const drawerId = room.currentRound?.drawerId ?? null;
+  const secretWord = room.currentRound && viewerParticipantId === room.currentRound.drawerId
+    ? room.currentRound.word
+    : undefined;
+
   return {
     code: room.code,
     status: room.status,
     participants: room.participants.map((participant) => ({ ...participant })),
     hostId: room.hostId,
     isHost: viewerParticipantId === room.hostId,
+    drawerId,
+    secretWord,
     availableWords: listWords(),
     roles: [...STARTER_ROLES]
   };
