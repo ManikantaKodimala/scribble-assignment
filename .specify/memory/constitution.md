@@ -1,50 +1,82 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+  Sync Impact Report
+  Version change: (none) → 1.0.0
+  New constitution — all sections populated from template.
+  Added sections: 5 Core Principles, Technology Constraints, Spec Kit Workflow, Governance.
+  Removed sections: none.
+  Templates requiring updates: none (all are generic).
+-->
+
+# Scribble Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. TypeScript Strictness
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+All code MUST be fully typed. `any` is forbidden; use `unknown` for truly dynamic types. New
+types MUST be declared for all function signatures, API payloads, and state shapes. Prefer
+immutable data structures and pure functions.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### II. Stateless Server
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+All game state MUST live in-memory only. No database, no persistent storage, no WebSockets,
+and no authentication. HTTP polling is the only sync mechanism. Restarting the server clears
+all state. Room cleanup (TTL/eviction) MUST be explicitly implemented — implicit memory
+leaks are unacceptable.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### III. Spec-First Development
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+Every feature MUST begin with a spec artifact documenting acceptance criteria and edge cases.
+Implementation MUST NOT start before the spec is approved. The required order is:
+Discovery → Specify → Clarify → Plan → Tasks → Implement → Validate. Code MUST match the
+spec; any deviation MUST be documented with rationale.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### IV. Edge Case Rigor
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+All input boundaries MUST be validated — empty strings, whitespace-only, null, and
+out-of-range values MUST produce specific error messages. Multi-room isolation MUST be
+explicitly tested. Case-insensitive comparison MUST be used for guess matching. Every
+endpoint MUST handle missing resources with distinguishable error codes.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### V. Brownfield Discipline
+
+Work within the existing file structure and conventions. Do NOT rewrite from scratch. Do NOT
+add new state-management or routing libraries beyond what the starter ships. Prefer small,
+targeted edits over large refactors. Follow established patterns for components, services,
+and API routes.
+
+## Technology Constraints
+
+- **Backend**: Node.js + Express + TypeScript, validated via Zod, executed via tsx.
+- **Frontend**: Vite + React 18 + React Router v6, styled via plain CSS.
+- **Testing**: Vitest for both backend (node environment) and frontend (jsdom environment).
+- **Forbidden**: WebSockets / Socket.io, databases / ORM, authentication / JWT / sessions,
+  new state-management or routing libraries, CSS-in-JS solutions.
+
+## Spec Kit Workflow
+
+All feature work MUST follow this lifecycle:
+
+1. **Discovery** — Read existing code, document gaps and assumptions in discoverNotes.md.
+2. **Specify** — Write acceptance criteria in a spec artifact under `.specify/`.
+3. **Clarify** — Resolve ambiguity with stakeholders before planning.
+4. **Plan** — Document state model changes, file-level changes, and data flow.
+5. **Tasks** — Decompose the plan into ordered, independently testable tasks.
+6. **Implement** — Complete one meaningful slice at a time and commit.
+7. **Validate** — Verify acceptance criteria with real browser testing (two tabs).
+
+Commit after each step. Keep commits granular and explainable.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes all other practices. Amendments MUST be documented with version
+rationale. Version numbering follows semantic versioning:
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+- **MAJOR**: Backward-incompatible principle changes, removals, or redefinitions.
+- **MINOR**: New principle or section added, materially expanded guidance.
+- **PATCH**: Clarifications, wording fixes, non-semantic refinements.
+
+All PRs MUST verify compliance with the principles defined here. Use `AGENTS.md` for
+runtime development guidance (commands, patterns, forbidden technologies).
+
+**Version**: 1.0.0 | **Ratified**: 2026-06-01 | **Last Amended**: 2026-06-01

@@ -14,6 +14,7 @@ export interface RoomState {
   participantId: string | null;
   error: string | null;
   isLoading: boolean;
+  pollError: string | null;
 }
 
 type Listener = () => void;
@@ -23,7 +24,8 @@ class RoomStore {
     room: null,
     participantId: null,
     error: null,
-    isLoading: false
+    isLoading: false,
+    pollError: null
   };
 
   private listeners = new Set<Listener>();
@@ -89,12 +91,28 @@ class RoomStore {
     return response;
   }
 
+  setPollError(message: string | null) {
+    this.setState({ pollError: message });
+  }
+
   async fetchRoom() {
     if (!this.state.room) {
       return null;
     }
 
     const response = await api.fetchRoom(this.state.room.code, this.state.participantId ?? undefined);
+    this.setRoomSnapshot(response.room);
+    return response.room;
+  }
+
+  async startGame() {
+    const { room, participantId } = this.state;
+
+    if (!room || !participantId) {
+      throw new Error("No active room session");
+    }
+
+    const response = await this.withLoading(() => api.startGame(room.code, participantId));
     this.setRoomSnapshot(response.room);
     return response.room;
   }

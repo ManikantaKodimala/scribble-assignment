@@ -33,10 +33,11 @@ function displayName(name?: string) {
   return name || "Player";
 }
 
-function createParticipant(name?: string): Participant {
+function createParticipant(name?: string, isHost = false): Participant {
   return {
     id: randomUUID(),
     name: displayName(name),
+    isHost,
     joinedAt: now()
   };
 }
@@ -50,11 +51,12 @@ export function listWords() {
 }
 
 export function createRoom(playerName?: string) {
-  const participant = createParticipant(playerName);
+  const participant = createParticipant(playerName, true);
   const room: Room = {
     code: generateUniqueCode(),
     status: "lobby",
     participants: [participant],
+    hostId: participant.id,
     createdAt: now(),
     updatedAt: now()
   };
@@ -74,7 +76,7 @@ export function joinRoom(code: string, playerName?: string) {
     return null;
   }
 
-  const participant = createParticipant(playerName);
+  const participant = createParticipant(playerName, false);
   room.participants.push(participant);
   room.updatedAt = now();
   rooms.set(room.code, room);
@@ -96,13 +98,38 @@ export function saveRoom(room: Room) {
   return getRoom(room.code);
 }
 
-export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {
-  void viewerParticipantId;
+export function startGame(code: string, participantId: string): Room | null {
+  const room = rooms.get(code);
 
+  if (!room) {
+    return null;
+  }
+
+  if (room.hostId !== participantId) {
+    throw new Error("Only the host can start the game");
+  }
+
+  if (room.status !== "lobby") {
+    throw new Error("Game has already started");
+  }
+
+  if (room.participants.length < 2) {
+    throw new Error("At least 2 participants are required to start the game");
+  }
+
+  room.status = "playing";
+  room.updatedAt = now();
+
+  return cloneRoom(room);
+}
+
+export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {
   return {
     code: room.code,
     status: room.status,
     participants: room.participants.map((participant) => ({ ...participant })),
+    hostId: room.hostId,
+    isHost: viewerParticipantId === room.hostId,
     availableWords: listWords(),
     roles: [...STARTER_ROLES]
   };

@@ -33,14 +33,14 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T001 [P] Add `isHost` field to `Participant` and `hostId` field to `Room` in `backend/src/models/game.ts`
-- [ ] T002 [P] Add `status` field (union `"lobby" | "playing"`) to `RoomSnapshot` in `backend/src/models/game.ts`
-- [ ] T003 Update `createRoom` and `joinRoom` in `backend/src/services/roomStore.ts` to set `hostId` (on create) and `isHost` (true for creator, false for joiners), and include `status` in the response
-- [ ] T004 [P] Update `toRoomSnapshot` to include `hostId`, `isHost`, and `status` in `backend/src/services/roomStore.ts`
-- [ ] T005 [P] Add room code validation schemas in `backend/src/api/schemas.ts` — empty string rejection, trim + uppercase normalization
-- [ ] T006 Update `POST /:code/join` and `GET /:code` in `backend/src/api/rooms.ts` to normalize codes (trim, uppercase) and return specific error messages for empty vs non-existent codes
-- [ ] T007 [P] Update frontend types in `frontend/src/services/api.ts` — add `status`, `hostId`, `isHost` to `RoomSnapshot` and `Participant` interfaces
-- [ ] T008 Add `pollError` field to `RoomState` in `frontend/src/state/roomStore.ts` and update `fetchRoom` to catch errors and set `pollError` instead of `error`
+- [X] T001 [P] Add `isHost` field to `Participant` and `hostId` field to `Room` in `backend/src/models/game.ts`
+- [X] T002 [P] Add `status` field (union `"lobby" | "playing"`) to `RoomSnapshot` in `backend/src/models/game.ts`
+- [X] T003 Update `createRoom` and `joinRoom` in `backend/src/services/roomStore.ts` to set `hostId` (on create) and `isHost` (true for creator, false for joiners), and include `status` in the response
+- [X] T004 [P] Update `toRoomSnapshot` to include `hostId`, `isHost`, and `status` in `backend/src/services/roomStore.ts`
+- [X] T005 [P] Add room code validation schemas in `backend/src/api/schemas.ts` — empty string rejection, trim + uppercase normalization
+- [X] T006 Update `POST /:code/join` and `GET /:code` in `backend/src/api/rooms.ts` to normalize codes (trim, uppercase) and return specific error messages for empty vs non-existent codes
+- [X] T007 [P] Update frontend types in `frontend/src/services/api.ts` — add `status`, `hostId`, `isHost` to `RoomSnapshot` and `Participant` interfaces
+- [X] T008 Add `pollError` field to `RoomState` in `frontend/src/state/roomStore.ts` and update `fetchRoom` to catch errors and set `pollError` instead of `error`
 
 **Checkpoint**: Foundation ready — user story implementation can now begin in parallel if desired.
 
@@ -56,7 +56,7 @@
 
 ### Implementation for User Story 1
 
-- [ ] T009 [US1] Update `CreateRoomPage.tsx` and `JoinRoomPage.tsx` in `frontend/src/pages/` to display host designation and room status in the lobby
+- [X] T009 [US1] Update `CreateRoomPage.tsx` and `JoinRoomPage.tsx` in `frontend/src/pages/` to display host designation and room status in the lobby
 
 **Checkpoint**: User Story 1 should be fully functional and testable independently — a single player can create a room and see host status.
 
@@ -70,8 +70,8 @@
 
 ### Implementation for User Story 2
 
-- [ ] T010 [US2] Update `frontend/src/pages/JoinRoomPage.tsx` to display backend error messages for empty codes ("Room code is required") and non-existent codes ("Room not found")
-- [ ] T011 [US2] Add frontend-side validation in `frontend/src/pages/JoinRoomPage.tsx` to prevent submission of empty room codes before the API call
+- [X] T010 [US2] Update `frontend/src/pages/JoinRoomPage.tsx` to display backend error messages for empty codes ("Room code is required") and non-existent codes ("Room not found")
+- [X] T011 [US2] Add frontend-side validation in `frontend/src/pages/JoinRoomPage.tsx` to prevent submission of empty room codes before the API call
 
 **Checkpoint**: User Stories 1 AND 2 should both work independently — players can create and join rooms with proper error feedback.
 
@@ -85,13 +85,13 @@
 
 ### Implementation for User Story 3
 
-- [ ] T012 [P] [US3] Add auto-polling with `setInterval` (~2s) in `frontend/src/pages/LobbyPage.tsx` calling `roomStore.fetchRoom()` — clear interval on unmount
-- [ ] T013 [US3] Create `LobbyStatus.tsx` component in `frontend/src/components/` to display a subtle error banner when `pollError` is set, hiding it on successful subsequent poll
-- [ ] T014 [P] [US3] Add `startGame` function in `frontend/src/services/api.ts` — `POST /rooms/:code/start` with `participantId` in body
-- [ ] T015 [US3] Implement `startGame` endpoint in `backend/src/api/rooms.ts` — validate caller is host (403), validate 2+ participants (403), transition room status from `"lobby"` to `"playing"`
-- [ ] T016 [P] [US3] Add `startGame` function in `backend/src/services/roomStore.ts` — host check, minimum player check, status transition, return updated room
-- [ ] T017 [US3] Update `frontend/src/pages/LobbyPage.tsx` — disable "Start Game" for non-hosts and when fewer than 2 participants; on host click, call `api.startGame()` and navigate to `/game` on success
-- [ ] T018 [US3] Add auto-navigation in `frontend/src/pages/LobbyPage.tsx` — when poll response returns `status: "playing"`, navigate to `/game`
+- [X] T012 [P] [US3] Add auto-polling with `setInterval` (~2s) in `frontend/src/pages/LobbyPage.tsx` calling `roomStore.fetchRoom()` — clear interval on unmount
+- [X] T013 [US3] Create `LobbyStatus.tsx` component in `frontend/src/components/` to display a subtle error banner when `pollError` is set, hiding it on successful subsequent poll
+- [X] T014 [P] [US3] Add `startGame` function in `frontend/src/services/api.ts` — `POST /rooms/:code/start` with `participantId` in body
+- [X] T015 [US3] Implement `startGame` endpoint in `backend/src/api/rooms.ts` — validate caller is host (403), validate 2+ participants (403), transition room status from `"lobby"` to `"playing"`
+- [X] T016 [P] [US3] Add `startGame` function in `backend/src/services/roomStore.ts` — host check, minimum player check, status transition, return updated room
+- [X] T017 [US3] Update `frontend/src/pages/LobbyPage.tsx` — disable "Start Game" for non-hosts and when fewer than 2 participants; on host click, call `api.startGame()` and navigate to `/game` on success
+- [X] T018 [US3] Add auto-navigation in `frontend/src/pages/LobbyPage.tsx` — when poll response returns `status: "playing"`, navigate to `/game`
 
 **Checkpoint**: All user stories should now be independently functional.
 
@@ -101,9 +101,9 @@
 
 **Purpose**: Improvements that affect multiple user stories.
 
-- [ ] T019 [P] Update `backend/src/services/roomStore.ts` to remove `void viewerParticipantId` — pass it through for future per-viewer filtering
-- [ ] T020 Backend tests — run `npm test` in `backend/` to verify existing tests still pass
-- [ ] T021 Frontend tests — run `npm test` in `frontend/` to verify existing tests still pass
+- [X] T019 [P] Update `backend/src/services/roomStore.ts` to remove `void viewerParticipantId` — pass it through for future per-viewer filtering
+- [X] T020 Backend tests — run `npm test` in `backend/` to verify existing tests still pass
+- [X] T021 Frontend tests — run `npm test` in `frontend/` to verify existing tests still pass
 - [ ] T022 Manual end-to-end verification with two browser tabs per quickstart.md
 
 ---
