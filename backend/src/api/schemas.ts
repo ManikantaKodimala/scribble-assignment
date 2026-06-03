@@ -16,6 +16,11 @@ export const roomViewerQuerySchema = z.object({
   participantId: z.string().optional()
 });
 
+export const guessBodySchema = z.object({
+  participantId: z.string().min(1, "Participant ID is required"),
+  text: z.string().trim().min(1, "Guess cannot be empty")
+});
+
 export const startGameBodySchema = z.object({
   participantId: z.string().min(1, "Participant ID is required")
 });

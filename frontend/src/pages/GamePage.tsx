@@ -2,14 +2,16 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
 import { GuessForm } from "../components/GuessForm";
+import { GuessHistory } from "../components/GuessHistory";
 import { ResultPanel } from "../components/ResultPanel";
 import { RoomCodeBadge } from "../components/RoomCodeBadge";
 import { Scoreboard } from "../components/Scoreboard";
-import { useRoomState } from "../state/roomStore";
+import { useRoomState, useRoomStore } from "../state/roomStore";
 
 export function GamePage() {
   const navigate = useNavigate();
-  const { room, participantId } = useRoomState();
+  const { room, participantId, roundComplete } = useRoomState();
+  const store = useRoomStore();
 
   useEffect(() => {
     if (!room) {
@@ -24,7 +26,6 @@ export function GamePage() {
   const viewer = room.participants.find((participant) => participant.id === participantId) ?? null;
   const isDrawer = participantId === room.drawerId;
   const drawer = room.participants.find((participant) => participant.id === room.drawerId) ?? null;
-
   return (
     <section className="panel game-page">
       <div className="game-page__header">
@@ -35,22 +36,28 @@ export function GamePage() {
         <RoomCodeBadge code={room.code} />
       </div>
 
-      {isDrawer && room.secretWord ? (
-        <div className="drawer-banner">
-          <Card title="Your Word">
-            <p className="secret-word">{room.secretWord}</p>
-          </Card>
+      {roundComplete ? (
+        <div className="round-complete-banner">
+          <h2 className="round-complete-banner__title">Round Complete!</h2>
         </div>
       ) : (
-        <div className="drawer-indicator drawer-indicator--guesser">
-          <p>{drawer ? `${drawer.name} is drawing` : "Waiting for drawer..."}</p>
-        </div>
+        isDrawer && room.secretWord ? (
+          <div className="drawer-banner">
+            <Card title="Your Word">
+              <p className="secret-word">{room.secretWord}</p>
+            </Card>
+          </div>
+        ) : (
+          <div className="drawer-indicator drawer-indicator--guesser">
+            <p>{drawer ? `${drawer.name} is drawing` : "Waiting for drawer..."}</p>
+          </div>
+        )
       )}
 
       <div className="game-page__layout">
         <aside className="game-page__sidebar game-page__sidebar--left">
           <Scoreboard />
-          <ResultPanel />
+          <GuessHistory />
         </aside>
 
         <div className="game-page__main">
@@ -59,6 +66,13 @@ export function GamePage() {
               Waiting for drawing...
             </div>
           </Card>
+          {isDrawer && (
+            <div className="button-row" style={{ marginTop: '0.5rem' }}>
+              <button className="button button--secondary" onClick={() => store.clearCanvas()}>
+                Clear Canvas
+              </button>
+            </div>
+          )}
         </div>
 
         <aside className="game-page__sidebar game-page__sidebar--right">

@@ -1,13 +1,14 @@
 import { Router } from "express";
 import {
   createRoomSchema,
+  guessBodySchema,
   HttpError,
   joinRoomSchema,
   roomCodeParamsSchema,
   roomViewerQuerySchema,
   startGameBodySchema
 } from "./schemas.js";
-import { createRoom, getRoom, joinRoom, startGame, toRoomSnapshot } from "../services/roomStore.js";
+import { clearCanvas, createRoom, getRoom, joinRoom, startGame, submitGuess, toRoomSnapshot } from "../services/roomStore.js";
 
 export function createRoomsRouter() {
   const router = Router();
@@ -76,6 +77,38 @@ export function createRoomsRouter() {
       response.json({
         room: toRoomSnapshot(updatedRoom, participantId)
       });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/:code/guess", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId, text } = guessBodySchema.parse(request.body);
+      const result = submitGuess(code.toUpperCase(), participantId, text);
+
+      if ("error" in result) {
+        throw new HttpError(400, result.error);
+      }
+
+      response.json({ result });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/:code/clear", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = startGameBodySchema.parse(request.body);
+      const result = clearCanvas(code.toUpperCase(), participantId);
+
+      if ("error" in result) {
+        throw new HttpError(400, result.error);
+      }
+
+      response.json({ ok: true });
     } catch (error) {
       next(error);
     }

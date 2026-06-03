@@ -1,5 +1,22 @@
 export type ParticipantRole = "drawer" | "guesser";
 
+export interface Guess {
+  id: string;
+  participantId: string;
+  participantName: string;
+  text: string;
+  isCorrect: boolean;
+  timestamp: string;
+  roundNumber: number;
+}
+
+export interface GuessResult {
+  correct: boolean;
+  roundComplete?: boolean;
+  guess: Guess;
+  scores: Record<string, number>;
+}
+
 export interface Participant {
   id: string;
   name: string;
@@ -15,6 +32,9 @@ export interface RoomSnapshot {
   isHost: boolean;
   drawerId: string | null;
   secretWord?: string;
+  guesses: Guess[];
+  scores: Record<string, number>;
+  roundComplete: boolean;
   availableWords: string[];
   roles: ParticipantRole[];
 }
@@ -65,6 +85,22 @@ export const api = {
   },
   startGame(code: string, participantId: string) {
     return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/start`, {
+      method: "POST",
+      body: JSON.stringify({ participantId })
+    });
+  },
+  submitGuess(code: string, participantId: string, text: string) {
+    return request<{ result: GuessResult }>(`/rooms/${encodeURIComponent(code)}/guess`, {
+      method: "POST",
+      body: JSON.stringify({ participantId, text })
+    });
+  },
+  fetchHistory(code: string, participantId: string, afterId?: string) {
+    const query = `?participantId=${encodeURIComponent(participantId)}${afterId ? `&afterId=${encodeURIComponent(afterId)}` : ""}`;
+    return request<{ guesses: Guess[] }>(`/rooms/${encodeURIComponent(code)}/history${query}`);
+  },
+  clearCanvas(code: string, participantId: string) {
+    return request<{ ok: boolean }>(`/rooms/${encodeURIComponent(code)}/clear`, {
       method: "POST",
       body: JSON.stringify({ participantId })
     });
