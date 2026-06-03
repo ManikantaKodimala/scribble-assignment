@@ -1,23 +1,61 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
 import { GuessForm } from "../components/GuessForm";
 import { GuessHistory } from "../components/GuessHistory";
-import { ResultPanel } from "../components/ResultPanel";
 import { RoomCodeBadge } from "../components/RoomCodeBadge";
 import { Scoreboard } from "../components/Scoreboard";
 import { useRoomState, useRoomStore } from "../state/roomStore";
+
+const POLL_INTERVAL_MS = 2000;
 
 export function GamePage() {
   const navigate = useNavigate();
   const { room, participantId, roundComplete } = useRoomState();
   const store = useRoomStore();
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const navigatingRef = useRef(false);
 
   useEffect(() => {
     if (!room) {
       navigate("/", { replace: true });
     }
   }, [navigate, room]);
+
+  useEffect(() => {
+    if (roundComplete && !navigatingRef.current) {
+      navigatingRef.current = true;
+      navigate("/results", { replace: true });
+    }
+  }, [roundComplete, navigate]);
+
+  useEffect(() => {
+    if (!room) {
+      return;
+    }
+
+    async function poll() {
+      try {
+        await store.fetchRoom();
+        store.setPollError(null);
+      } catch (caughtError) {
+        store.setPollError(caughtError instanceof Error ? caughtError.message : "Unable to refresh room");
+      }
+    }
+
+    poll();
+    pollRef.current = setInterval(poll, POLL_INTERVAL_MS);
+
+    return () => {
+      if (pollRef.current !== null) {
+        clearInterval(pollRef.current);
+      }
+    };
+  }, [room, store]);
+
+  const handleClearCanvas = useCallback(async () => {
+    await store.clearCanvas();
+  }, [store]);
 
   if (!room) {
     return null;
@@ -68,7 +106,7 @@ export function GamePage() {
           </Card>
           {isDrawer && (
             <div className="button-row" style={{ marginTop: '0.5rem' }}>
-              <button className="button button--secondary" onClick={() => store.clearCanvas()}>
+              <button className="button button--secondary" onClick={handleClearCanvas}>
                 Clear Canvas
               </button>
             </div>

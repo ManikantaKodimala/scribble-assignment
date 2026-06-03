@@ -99,6 +99,13 @@ export const api = {
     const query = `?participantId=${encodeURIComponent(participantId)}${afterId ? `&afterId=${encodeURIComponent(afterId)}` : ""}`;
     return request<{ guesses: Guess[] }>(`/rooms/${encodeURIComponent(code)}/history${query}`);
   },
+  restartGame(code: string, participantId: string) {
+    return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/restart`, {
+      method: "POST",
+      body: JSON.stringify({ participantId })
+    });
+  },
+
   clearCanvas(code: string, participantId: string) {
     return request<{ ok: boolean }>(`/rooms/${encodeURIComponent(code)}/clear`, {
       method: "POST",

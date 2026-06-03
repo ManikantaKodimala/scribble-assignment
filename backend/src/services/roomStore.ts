@@ -236,9 +236,31 @@ export function clearCanvas(
   return { ok: true };
 }
 
+export function restartGame(code: string, participantId: string): Room | null {
+  const room = rooms.get(code);
+
+  if (!room) {
+    return null;
+  }
+
+  if (room.hostId !== participantId) {
+    throw new Error("Only the host can restart the game");
+  }
+
+  room.scores = {};
+  room.currentRound = null;
+  room.status = "lobby";
+  room.updatedAt = now();
+
+  return cloneRoom(room);
+}
+
 export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {
   const drawerId = room.currentRound?.drawerId ?? null;
-  const secretWord = room.currentRound && viewerParticipantId === room.currentRound.drawerId
+  const roundComplete = room.currentRound?.status === "completed";
+  const secretWord = room.currentRound && (
+    viewerParticipantId === room.currentRound.drawerId || roundComplete
+  )
     ? room.currentRound.word
     : undefined;
 
@@ -252,7 +274,7 @@ export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSn
     secretWord,
     guesses: room.currentRound?.guesses ?? [],
     scores: { ...room.scores },
-    roundComplete: room.currentRound?.status === "completed",
+    roundComplete,
     availableWords: listWords(),
     roles: [...STARTER_ROLES]
   };

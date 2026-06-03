@@ -8,7 +8,7 @@ import {
   roomViewerQuerySchema,
   startGameBodySchema
 } from "./schemas.js";
-import { clearCanvas, createRoom, getRoom, joinRoom, startGame, submitGuess, toRoomSnapshot } from "../services/roomStore.js";
+import { clearCanvas, createRoom, getRoom, joinRoom, restartGame, startGame, submitGuess, toRoomSnapshot } from "../services/roomStore.js";
 
 export function createRoomsRouter() {
   const router = Router();
@@ -93,6 +93,24 @@ export function createRoomsRouter() {
       }
 
       response.json({ result });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/:code/restart", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = startGameBodySchema.parse(request.body);
+      const updatedRoom = restartGame(code.toUpperCase(), participantId);
+
+      if (!updatedRoom) {
+        throw new HttpError(404, "Room not found");
+      }
+
+      response.json({
+        room: toRoomSnapshot(updatedRoom, participantId)
+      });
     } catch (error) {
       next(error);
     }

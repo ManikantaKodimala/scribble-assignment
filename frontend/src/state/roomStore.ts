@@ -137,6 +137,18 @@ class RoomStore {
     return response.result;
   }
 
+  async restartGame() {
+    const { room, participantId } = this.state;
+
+    if (!room || !participantId) {
+      throw new Error("No active room session");
+    }
+
+    const response = await this.withLoading(() => api.restartGame(room.code, participantId));
+    this.setRoomSnapshot(response.room);
+    return response.room;
+  }
+
   async clearCanvas() {
     const { room, participantId } = this.state;
 
